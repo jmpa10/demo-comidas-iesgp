@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 140 10% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 140 10% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 140 10% 10%;
+
+    /* Tema verde corporativo IES Gregorio Prieto */
+    --primary: 142 76% 36%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 142 30% 90%;
+    --secondary-foreground: 142 76% 20%;
+
+    --muted: 142 30% 95%;
+    --muted-foreground: 140 10% 45%;
+
+    --accent: 142 50% 85%;
+    --accent-foreground: 142 76% 25%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 142 30% 85%;
+    --input: 142 30% 85%;
+    --ring: 142 76% 36%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 140 30% 5%;
+    --foreground: 0 0% 98%;
+
+    --card: 140 20% 8%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 140 20% 8%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 142 76% 36%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 142 30% 15%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 142 30% 15%;
+    --muted-foreground: 140 10% 65%;
+
+    --accent: 142 40% 20%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 142 30% 15%;
+    --input: 142 30% 15%;
+    --ring: 142 76% 40%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
