@@ -39,7 +39,7 @@ async function main() {
       name: 'Menú del Día - Lunes',
       description: 'Menú completo con primero, segundo y postre',
       price: 12.50,
-      date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 días desde ahora
+      date: new Date(), // Fecha de hoy
       available: true,
       dishes: {
         create: [
@@ -73,7 +73,7 @@ async function main() {
       name: 'Menú del Día - Miércoles',
       description: 'Especial de pasta italiana',
       price: 11.00,
-      date: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000), // 4 días desde ahora
+      date: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // Mañana
       available: true,
       dishes: {
         create: [

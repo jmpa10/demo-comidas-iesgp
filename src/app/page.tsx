@@ -14,9 +14,6 @@ export default async function HomePage() {
   const menus = await prisma.menu.findMany({
     where: {
       available: true,
-      date: {
-        gte: new Date(),
-      },
     },
     include: {
       dishes: true,
