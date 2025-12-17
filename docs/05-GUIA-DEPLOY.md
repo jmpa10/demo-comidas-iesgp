@@ -201,6 +201,11 @@ En este repositorio tienes una versión lista para usar:
 docker compose -f docker-compose.image.yml --env-file .env.dockerhub up -d
 ```
 
+Notas (n8n):
+
+- Si n8n está en tu máquina pero la app va en Docker, desde el contenedor no uses `localhost`. En macOS/Windows suele funcionar `http://host.docker.internal:5678/...`.
+- Usa `/webhook-test/` solo en modo prueba (cuando el nodo Webhook está “escuchando”). Para que funcione siempre, activa el workflow y usa la URL `/webhook/`.
+
 Si prefieres modificar tu `docker-compose.yml` existente, cambia el servicio `app` para usar `image:` en lugar de `build:`:
 
 ```yaml

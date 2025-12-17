@@ -96,8 +96,12 @@ docker compose -f docker-compose.image.yml --env-file .env.dockerhub up -d</pre>
     <pre>N8N_WEBHOOK_URL=PEGA_AQUI_TU_URL_DE_N8N</pre>
 
     <div class="note">
-      <p><strong>Nota sobre localhost:</strong> si n8n está en tu misma máquina y la app va en Docker, a veces <code>localhost</code> no funciona desde el contenedor. En macOS/Windows suele funcionar usando:</p>
+      <p><strong>Nota sobre localhost (muy importante):</strong> si la app está en Docker, <code>localhost</code> desde el contenedor NO apunta a tu máquina, apunta al propio contenedor.</p>
+      <p class="small">Si n8n está en Docker (en otro contenedor/otro stack) pero expone el puerto <code>5678</code> al host, en macOS/Windows lo más simple es usar:</p>
+      <pre>N8N_WEBHOOK_URL=http://host.docker.internal:5678/webhook/XXXX</pre>
+      <p class="small">Para pruebas en modo “Test” (solo mientras el nodo Webhook está escuchando):</p>
       <pre>N8N_WEBHOOK_URL=http://host.docker.internal:5678/webhook-test/XXXX</pre>
+      <p class="small"><strong>Importante:</strong> <code>/webhook-test/</code> da 404 si no has pulsado “Execute workflow / Listen for test event”. Para que funcione siempre, activa el workflow y usa la URL <code>/webhook/</code> (producción).</p>
     </div>
 
     <h2>8) Comandos útiles</h2>
