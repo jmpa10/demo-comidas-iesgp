@@ -19,6 +19,8 @@
 9. [Monitorización](#9-monitorización)
 10. [Backups](#10-backups)
 11. [Troubleshooting](#11-troubleshooting)
+12. [Despliegue con Docker](#12-despliegue-con-docker)
+13. [Publicar en DockerHub](#13-publicar-en-dockerhub)
 
 ---
 
@@ -72,6 +74,138 @@ npm i -g vercel
 
 # Instalar Prisma CLI
 npm i -g prisma
+
+# (Alternativa) Docker para despliegue en contenedores
+docker --version
+docker compose version
+```
+
+---
+
+## 12. Despliegue con Docker
+
+Esta opción despliega **aplicación + base de datos** en un único `docker compose` (ideal para servidor propio / VPS / NAS).
+
+### 12.1 Requisitos
+
+- Docker y Docker Compose instalados.
+
+### 12.2 Variables de entorno
+
+El repositorio incluye un archivo de ejemplo:
+
+- `.env.docker.example` (plantilla)
+- `.env.docker` (valores por defecto para local)
+
+Para producción, **rellena** como mínimo:
+
+- `NEXTAUTH_SECRET`
+- `NEXTAUTH_URL`
+- `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET` (si usas Google)
+- Variables `NEXT_PUBLIC_FIREBASE_*` (si usas Firebase)
+
+### 12.3 Arranque (producción sencilla)
+
+Desde la raíz del proyecto:
+
+```bash
+docker compose up -d --build
+```
+
+La app queda disponible en:
+
+- http://localhost:3000
+
+### 12.4 Base de datos y Prisma
+
+En este proyecto, el contenedor ejecuta automáticamente al arrancar:
+
+- `npx prisma migrate deploy` si existe `prisma/migrations/`
+- si no existe, hace `npx prisma db push`
+
+Si quieres poblar datos demo (solo recomendado en dev):
+
+1) En `.env.docker` pon `PRISMA_SEED=true`
+2) Reinicia:
+
+```bash
+docker compose restart app
+```
+
+### 12.5 Logs y mantenimiento
+
+```bash
+# Ver logs
+docker compose logs -f app
+
+# Parar
+docker compose down
+
+# Parar y borrar datos (⚠️ elimina la BD)
+docker compose down -v
+```
+
+---
+
+## 13. Publicar en DockerHub
+
+### 13.1 Opción A (recomendada): GitHub Actions
+
+El repositorio incluye un workflow en `.github/workflows/dockerhub.yml` que construye y publica la imagen en DockerHub al hacer push a `main`.
+
+1) Crea un repositorio en DockerHub (ejemplo):
+
+- `jmpa15/prieto-eats`
+
+2) En GitHub → Settings → Secrets and variables → Actions → **New repository secret** añade:
+
+- `DOCKERHUB_USERNAME` → tu usuario de DockerHub
+- `DOCKERHUB_TOKEN` → un *Access Token* de DockerHub (recomendado, no uses tu password)
+
+3) (Opcional) Cambia el nombre de imagen editando `IMAGE_NAME` en el workflow.
+
+Tags que publica:
+
+- `latest`
+- `sha-<commit>`
+- `vX.Y.Z` (cuando creas un tag Git `vX.Y.Z`)
+
+### 13.2 Opción B: push manual desde tu máquina
+
+```bash
+# Login
+docker login
+
+# Build local
+docker build -t jmpa15/prieto-eats:latest .
+
+# Push
+docker push jmpa15/prieto-eats:latest
+```
+
+### 13.3 Ejecutar desde DockerHub en un servidor
+
+Ejemplo de despliegue usando la imagen publicada y Postgres en el mismo `docker compose`:
+
+1) En el servidor, copia `.env.docker` y ajusta variables.
+2) En `docker-compose.yml`, cambia el servicio `app` para usar `image:` en lugar de `build:`:
+
+```yaml
+  app:
+    image: jmpa15/prieto-eats:latest
+    env_file:
+      - .env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+```
+
+Y arranca:
+
+```bash
+docker compose up -d
 ```
 
 ### 2.2 Repositorio Git
