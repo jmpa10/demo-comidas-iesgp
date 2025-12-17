@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Guía rápida: desplegar la app con Docker</title>
+  <style>
+    :root { color-scheme: light; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; line-height: 1.45; color: #111; }
+    .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+    h1, h2 { margin: 0 0 12px; }
+    h2 { margin-top: 22px; }
+    p { margin: 0 0 10px; }
+    ol, ul { margin: 0 0 12px 22px; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    pre { background: #f6f8fa; padding: 12px; border: 1px solid #ddd; border-radius: 8px; overflow-x: auto; }
+    .note { background: #fff8e1; border: 1px solid #f0d58c; padding: 10px 12px; border-radius: 8px; margin: 10px 0 14px; }
+    .ok { background: #eef7ee; border: 1px solid #b7e0b8; padding: 10px 12px; border-radius: 8px; margin: 10px 0 14px; }
+    .small { font-size: 0.95em; color: #333; }
+    a { color: inherit; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Guía rápida: desplegar la app con Docker (lo más simple posible)</h1>
+    <p class="small">Objetivo: levantar la aplicación (Next.js) + base de datos (PostgreSQL) en tu ordenador usando Docker, sin instalar Node/Prisma.</p>
+
+    <h2>1) Requisitos</h2>
+    <ul>
+      <li>Docker Desktop instalado y en ejecución.</li>
+      <li>Docker Compose (normalmente viene incluido con Docker Desktop).</li>
+    </ul>
+
+    <h2>2) Archivos necesarios</h2>
+    <p>En la carpeta del proyecto (o en una carpeta nueva donde tengas estos ficheros), asegúrate de tener:</p>
+    <ul>
+      <li><code>docker-compose.image.yml</code></li>
+      <li><code>.env.dockerhub.example</code></li>
+    </ul>
+
+    <h2>3) Configurar variables (1 minuto)</h2>
+    <ol>
+      <li>Copia el fichero de ejemplo:</li>
+    </ol>
+    <pre>cp .env.dockerhub.example .env.dockerhub</pre>
+    <ol start="2">
+      <li>Edita <code>.env.dockerhub</code> y cambia como mínimo:</li>
+    </ol>
+    <pre>NEXTAUTH_SECRET=pon-aqui-un-secreto-largo</pre>
+
+    <div class="note">
+      <p><strong>Importante:</strong> no uses un secreto corto. Cualquier cadena larga aleatoria sirve.</p>
+    </div>
+
+    <h2>4) Arrancar la app</h2>
+    <p>Ejecuta desde la carpeta donde están los ficheros:</p>
+    <pre>docker compose -f docker-compose.image.yml --env-file .env.dockerhub up -d</pre>
+
+    <h2>5) Abrir en el navegador</h2>
+    <p>Abre:</p>
+    <pre>http://localhost:3000</pre>
+
+    <h2>6) Login (usuarios demo)</h2>
+    <p>Si la base de datos incluye datos demo (según el entorno), podrás usar:</p>
+    <ul>
+      <li>Profesor: <code>admin@iesgregorioprieto.es</code></li>
+      <li>Alumno/cliente: <code>cliente@iesgregorioprieto.es</code></li>
+    </ul>
+    <p class="small">Si no existen usuarios demo en tu base de datos, pide al organizador que active el seed o que te indique cómo poblarla.</p>
+
+    <h2>7) (Opcional) Conectar n8n para automatizaciones</h2>
+    <p>La app puede enviar un webhook a n8n cuando ocurren eventos:</p>
+    <ul>
+      <li><code>order.created</code> (cuando se crea un pedido)</li>
+      <li><code>menu.created</code> (cuando se crea un menú)</li>
+    </ul>
+
+    <p>Para activar n8n:</p>
+    <ol>
+      <li>En n8n, crea un workflow con un nodo <strong>Webhook</strong> (Trigger) y copia la URL.</li>
+      <li>En <code>.env.dockerhub</code>, rellena:</li>
+    </ol>
+    <pre>N8N_WEBHOOK_URL=PEGA_AQUI_TU_URL_DE_N8N</pre>
+
+    <div class="note">
+      <p><strong>Nota sobre localhost:</strong> si n8n está en tu misma máquina y la app va en Docker, a veces <code>localhost</code> no funciona desde el contenedor. En macOS/Windows suele funcionar usando:</p>
+      <pre>N8N_WEBHOOK_URL=http://host.docker.internal:5678/webhook-test/XXXX</pre>
+    </div>
+
+    <h2>8) Comandos útiles</h2>
+    <pre># Ver estado
+ docker compose -f docker-compose.image.yml --env-file .env.dockerhub ps
+
+# Ver logs
+ docker compose -f docker-compose.image.yml --env-file .env.dockerhub logs -f app
+
+# Parar contenedores
+ docker compose -f docker-compose.image.yml --env-file .env.dockerhub down
+
+# Parar y borrar la base de datos (cuidado: borra datos)
+ docker compose -f docker-compose.image.yml --env-file .env.dockerhub down -v</pre>
+
+    <div class="ok">
+      <p><strong>Listo.</strong> Con esos pasos ya puedes desplegar y probar la app en local con Docker.</p>
+    </div>
+
+    <p class="small">Si algo falla, adjunta el resultado de <code>docker compose ... logs -f app</code> al responder este correo.</p>
+  </div>
+</body>
+</html>
