@@ -66,7 +66,20 @@
       <li>Profesor: <code>admin@iesgregorioprieto.es</code></li>
       <li>Alumno/cliente: <code>cliente@iesgregorioprieto.es</code></li>
     </ul>
-    <p class="small">Si no existen usuarios demo en tu base de datos, pide al organizador que active el seed o que te indique cómo poblarla.</p>
+    <p class="small">Para que se creen estos usuarios automáticamente, en <code>.env.dockerhub</code> debe estar <code>PRISMA_SEED=true</code> (en el fichero de ejemplo ya viene así).</p>
+
+    <div class="note">
+      <p><strong>Si arrancaste la app sin seed y no te deja iniciar sesión:</strong></p>
+      <ol>
+        <li>Comprueba que en <code>.env.dockerhub</code> tienes <code>PRISMA_SEED=true</code></li>
+        <li>Reinicia los contenedores:</li>
+      </ol>
+      <pre>docker compose -f docker-compose.image.yml --env-file .env.dockerhub down
+docker compose -f docker-compose.image.yml --env-file .env.dockerhub up -d</pre>
+      <p class="small">Si aun así no aparecen (por ejemplo, si ya hay una base de datos creada sin usuarios), borra el volumen de la BD y vuelve a arrancar (esto borra datos):</p>
+      <pre>docker compose -f docker-compose.image.yml --env-file .env.dockerhub down -v
+docker compose -f docker-compose.image.yml --env-file .env.dockerhub up -d</pre>
+    </div>
 
     <h2>7) (Opcional) Conectar n8n para automatizaciones</h2>
     <p>La app puede enviar un webhook a n8n cuando ocurren eventos:</p>
