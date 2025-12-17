@@ -33,6 +33,10 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Read package version
+        id: pkg
+        run: echo "version=$(node -p \"require('./package.json').version\")" >> $GITHUB_OUTPUT
+
       - name: Docker metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -40,6 +44,7 @@ jobs:
           images: jmpa15/${{ env.IMAGE_NAME }}
           tags: |
             type=sha
+            type=raw,value=v${{ steps.pkg.outputs.version }}
             type=ref,event=tag
 
       - name: Build and push

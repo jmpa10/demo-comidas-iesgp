@@ -168,6 +168,12 @@ Tags que publica:
 
 - `latest`
 - `sha-<commit>`
+- `v<version>` (lee la versión de `package.json`, por ejemplo `v0.1.0`)
+
+Recomendación:
+
+- Si quieres tags de versión “reales”, incrementa `version` en `package.json` cuando hagas una release.
+- Si además creas un tag Git `vX.Y.Z` y lo subes (`git tag vX.Y.Z && git push origin vX.Y.Z`), también se publicará ese tag en DockerHub.
 - `vX.Y.Z` (cuando creas un tag Git `vX.Y.Z`)
 
 Nota: el workflow fuerza siempre `latest` para que apunte a la última imagen publicada.
