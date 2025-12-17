@@ -39,7 +39,6 @@ jobs:
         with:
           images: jmpa15/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=latest
             type=sha
             type=ref,event=tag
 
@@ -49,7 +48,10 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          # Forzamos siempre el tag latest para que apunte a la última build publicada.
+          tags: |
+            jmpa15/${{ env.IMAGE_NAME }}:latest
+            ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

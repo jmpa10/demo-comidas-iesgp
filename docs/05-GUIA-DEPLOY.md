@@ -170,6 +170,8 @@ Tags que publica:
 - `sha-<commit>`
 - `vX.Y.Z` (cuando creas un tag Git `vX.Y.Z`)
 
+Nota: el workflow fuerza siempre `latest` para que apunte a la última imagen publicada.
+
 ### 13.2 Opción B: push manual desde tu máquina
 
 ```bash
