@@ -187,8 +187,19 @@ docker push jmpa15/prieto-eats:latest
 
 Ejemplo de despliegue usando la imagen publicada y Postgres en el mismo `docker compose`:
 
-1) En el servidor, copia `.env.docker` y ajusta variables.
-2) En `docker-compose.yml`, cambia el servicio `app` para usar `image:` en lugar de `build:`:
+En este repositorio tienes una versión lista para usar:
+
+- `docker-compose.image.yml`
+- `.env.dockerhub.example`
+
+1) Copia `.env.dockerhub.example` como `.env.dockerhub` y ajusta variables.
+2) Arranca con:
+
+```bash
+docker compose -f docker-compose.image.yml --env-file .env.dockerhub up -d
+```
+
+Si prefieres modificar tu `docker-compose.yml` existente, cambia el servicio `app` para usar `image:` en lugar de `build:`:
 
 ```yaml
   app:

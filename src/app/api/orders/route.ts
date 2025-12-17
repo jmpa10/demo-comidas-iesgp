@@ -1,6 +1,7 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { sendToN8n } from '@/lib/n8n';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
@@ -64,6 +65,22 @@ export async function POST(request: Request) {
         },
         menu: true,
       },
+    });
+
+    await sendToN8n('order.created', {
+      id: order.id,
+      userId: order.userId,
+      menuId: order.menuId,
+      total: order.total,
+      status: order.status,
+      isFullMenu: order.isFullMenu,
+      createdAt: order.createdAt,
+      items: order.items.map((item) => ({
+        id: item.id,
+        dishId: item.dishId,
+        quantity: item.quantity,
+        price: item.price,
+      })),
     });
 
     return NextResponse.json(order);

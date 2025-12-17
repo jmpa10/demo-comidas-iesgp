@@ -1,6 +1,7 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { sendToN8n } from '@/lib/n8n';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
@@ -37,6 +38,23 @@ export async function POST(request: Request) {
       include: {
         dishes: true,
       },
+    });
+
+    await sendToN8n('menu.created', {
+      id: menu.id,
+      name: menu.name,
+      description: menu.description,
+      price: menu.price,
+      available: menu.available,
+      date: menu.date,
+      createdAt: menu.createdAt,
+      dishes: menu.dishes.map((dish) => ({
+        id: dish.id,
+        name: dish.name,
+        description: dish.description,
+        price: dish.price,
+        imageUrl: dish.imageUrl,
+      })),
     });
 
     return NextResponse.json(menu);
