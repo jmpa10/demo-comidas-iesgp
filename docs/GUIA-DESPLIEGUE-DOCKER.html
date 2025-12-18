@@ -35,14 +35,14 @@
     <p>En la carpeta del proyecto (o en una carpeta nueva donde tengas estos ficheros), asegúrate de tener:</p>
     <ul>
       <li><code>docker-compose.image.yml</code></li>
-      <li><code>.env.dockerhub.example</code></li>
+      <li><code>env/.env.dockerhub.example</code></li>
     </ul>
 
     <h2>3) Configurar variables (1 minuto)</h2>
     <ol>
       <li>Copia el fichero de ejemplo:</li>
     </ol>
-    <pre>cp .env.dockerhub.example .env.dockerhub</pre>
+    <pre>cp env/.env.dockerhub.example env/.env.dockerhub</pre>
     <ol start="2">
       <li>Edita <code>.env.dockerhub</code> y cambia como mínimo:</li>
     </ol>
@@ -54,7 +54,7 @@
 
     <h2>4) Arrancar la app</h2>
     <p>Ejecuta desde la carpeta donde están los ficheros:</p>
-    <pre>docker compose -f docker-compose.image.yml --env-file .env.dockerhub up -d</pre>
+    <pre>docker compose -f docker-compose.image.yml --env-file env/.env.dockerhub up -d</pre>
 
     <h2>5) Abrir en el navegador</h2>
     <p>Abre:</p>
@@ -74,11 +74,11 @@
         <li>Comprueba que en <code>.env.dockerhub</code> tienes <code>PRISMA_SEED=true</code></li>
         <li>Reinicia los contenedores:</li>
       </ol>
-      <pre>docker compose -f docker-compose.image.yml --env-file .env.dockerhub down
-docker compose -f docker-compose.image.yml --env-file .env.dockerhub up -d</pre>
+      <pre>docker compose -f docker-compose.image.yml --env-file env/.env.dockerhub down
+    docker compose -f docker-compose.image.yml --env-file env/.env.dockerhub up -d</pre>
       <p class="small">Si aun así no aparecen (por ejemplo, si ya hay una base de datos creada sin usuarios), borra el volumen de la BD y vuelve a arrancar (esto borra datos):</p>
-      <pre>docker compose -f docker-compose.image.yml --env-file .env.dockerhub down -v
-docker compose -f docker-compose.image.yml --env-file .env.dockerhub up -d</pre>
+      <pre>docker compose -f docker-compose.image.yml --env-file env/.env.dockerhub down -v
+    docker compose -f docker-compose.image.yml --env-file env/.env.dockerhub up -d</pre>
     </div>
 
     <h2>7) (Opcional) Conectar n8n para automatizaciones</h2>
@@ -106,16 +106,16 @@ docker compose -f docker-compose.image.yml --env-file .env.dockerhub up -d</pre>
 
     <h2>8) Comandos útiles</h2>
     <pre># Ver estado
- docker compose -f docker-compose.image.yml --env-file .env.dockerhub ps
+   docker compose -f docker-compose.image.yml --env-file env/.env.dockerhub ps
 
 # Ver logs
- docker compose -f docker-compose.image.yml --env-file .env.dockerhub logs -f app
+ docker compose -f docker-compose.image.yml --env-file env/.env.dockerhub logs -f app
 
 # Parar contenedores
- docker compose -f docker-compose.image.yml --env-file .env.dockerhub down
+ docker compose -f docker-compose.image.yml --env-file env/.env.dockerhub down
 
 # Parar y borrar la base de datos (cuidado: borra datos)
- docker compose -f docker-compose.image.yml --env-file .env.dockerhub down -v</pre>
+ docker compose -f docker-compose.image.yml --env-file env/.env.dockerhub down -v</pre>
 
     <div class="ok">
       <p><strong>Listo.</strong> Con esos pasos ya puedes desplegar y probar la app en local con Docker.</p>

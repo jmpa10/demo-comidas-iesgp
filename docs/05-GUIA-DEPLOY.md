@@ -94,8 +94,10 @@ Esta opción despliega **aplicación + base de datos** en un único `docker comp
 
 El repositorio incluye un archivo de ejemplo:
 
-- `.env.docker.example` (plantilla)
-- `.env.docker` (valores por defecto para local)
+- `env/.env.docker` (valores por defecto para local)
+- `env/.env.dockerhub.example` (plantilla para ejecutar desde DockerHub)
+
+Para no saturar la raíz del repositorio, los ficheros de entorno están en `env/`.
 
 Para producción, **rellena** como mínimo:
 
@@ -125,7 +127,7 @@ En este proyecto, el contenedor ejecuta automáticamente al arrancar:
 
 Si quieres poblar datos demo (solo recomendado en dev):
 
-1) En `.env.docker` pon `PRISMA_SEED=true`
+1) En `env/.env.docker` pon `PRISMA_SEED=true`
 2) Reinicia:
 
 ```bash
@@ -198,13 +200,13 @@ Ejemplo de despliegue usando la imagen publicada y Postgres en el mismo `docker 
 En este repositorio tienes una versión lista para usar:
 
 - `docker-compose.image.yml`
-- `.env.dockerhub.example`
+- `env/.env.dockerhub.example`
 
-1) Copia `.env.dockerhub.example` como `.env.dockerhub` y ajusta variables.
+1) Copia `env/.env.dockerhub.example` como `env/.env.dockerhub` y ajusta variables.
 2) Arranca con:
 
 ```bash
-docker compose -f docker-compose.image.yml --env-file .env.dockerhub up -d
+docker compose -f docker-compose.image.yml --env-file env/.env.dockerhub up -d
 ```
 
 Notas (n8n):
@@ -218,7 +220,7 @@ Si prefieres modificar tu `docker-compose.yml` existente, cambia el servicio `ap
   app:
     image: jmpa15/prieto-eats:latest
     env_file:
-      - .env.docker
+      - env/.env.docker
     depends_on:
       db:
         condition: service_healthy

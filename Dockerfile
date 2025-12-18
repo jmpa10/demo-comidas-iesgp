@@ -5,7 +5,7 @@ WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Prisma necesita DATABASE_URL (aunque no conecte) para `prisma generate`.
-# Se sobrescribe en runtime vía docker-compose/.env.docker.
+# Se sobrescribe en runtime vía docker-compose (env_file).
 ENV DATABASE_URL=postgresql://user:pass@localhost:5432/db?schema=public
 
 # Prisma engine y utilidades para esperar a Postgres

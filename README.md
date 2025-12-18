@@ -1,222 +1,58 @@
-# Sistema de Reservas - IES Gregorio Prieto
 
-Aplicación web moderna para la gestión y reserva de menús de comida preparados por los alumnos de hostelería del IES Gregorio Prieto.
+# Prieto Eats (IES Gregorio Prieto)
 
-## 🎯 Características
+Aplicación web para reservas/venta de menús del IES Gregorio Prieto.
 
-- **Autenticación con Google**: Login seguro mediante cuentas de Google
-- **Dos roles de usuario**:
-  - **Cliente**: Puede ver menús y hacer reservas
-  - **Profesor/Admin**: Puede gestionar menús, platos y ver pedidos
-- **Gestión de Menús**: Crear menús con múltiples platos
-- **Fotos de Platos**: Cada plato puede tener su imagen
-- **Subida de Imágenes**: 
-  - 📤 Subir imágenes desde el dispositivo (Firebase Storage)
-  - 🔗 Usar URLs externas (ej: Unsplash, Imgur)
-  - 👁️ Vista previa en tiempo real
-  - 📊 Indicador de progreso de subida
-- **Compra Flexible**: Compra del menú completo o platos individuales
-- **Interfaz Moderna**: Diseño limpio en tonos verdes corporativos del instituto
+- Roles: **Cliente** y **Profesor/Admin**
+- Stack: Next.js + Prisma + PostgreSQL + NextAuth
 
-## 🛠️ Stack Tecnológico
+## Ejecutar desde DockerHub (recomendado)
 
-- **Framework**: Next.js 14+ con App Router
-- **Lenguaje**: TypeScript
-- **Base de Datos**: PostgreSQL con Prisma ORM
-- **Autenticación**: NextAuth.js con Google OAuth
-- **Almacenamiento**: Firebase Storage (fotos)
-- **Estilos**: Tailwind CSS
-- **Componentes UI**: Shadcn/ui + Radix UI
+Requisitos: Docker Desktop (con Docker Compose).
 
-## 📋 Requisitos Previos
-
-Antes de comenzar, asegúrate de tener instalado:
-
-- **Node.js** 18.0 o superior
-- **npm** o **yarn**
-- **PostgreSQL** 14 o superior
-- Una cuenta de **Google Cloud Platform** (para OAuth)
-- Una cuenta de **Firebase** (para almacenamiento de imágenes)
-
-## 🚀 Instalación
-
-### 1. Clonar el repositorio
+1) Crea tu fichero de entorno (solo una vez):
 
 ```bash
-git clone <url-del-repositorio>
-cd "Proyecto de Innovación"
+cp env/.env.dockerhub.example env/.env.dockerhub
 ```
 
-### 2. Instalar dependencias
+Edita `env/.env.dockerhub` y cambia como mínimo `NEXTAUTH_SECRET`.
+
+2) Arranca la app + Postgres usando la imagen publicada:
 
 ```bash
-npm install
+docker compose -f docker-compose.image.yml --env-file env/.env.dockerhub up -d
 ```
 
-### 3. Configurar variables de entorno
+3) Abre:
 
-Crea un archivo `.env` en la raíz del proyecto copiando `.env.example`:
+- http://localhost:3000
+
+### Login demo
+
+Si `PRISMA_SEED=true` (viene así en el ejemplo), tendrás usuarios demo:
+
+- Profesor: `admin@iesgregorioprieto.es`
+- Cliente: `cliente@iesgregorioprieto.es`
+
+## n8n (opcional)
+
+La app puede notificar a n8n al crear un pedido.
+
+- Configura `N8N_WEBHOOK_URL` en `env/.env.dockerhub`.
+- Si n8n está en Docker (otro stack) exponiendo `5678` al host (macOS/Windows):
+  - Producción: `http://host.docker.internal:5678/webhook/<id>`
+  - Test: `http://host.docker.internal:5678/webhook-test/<id>` (solo si el workflow está “escuchando”)
+
+## Desarrollo (desde el código)
+
+Para desarrollo local con contenedores (build local):
 
 ```bash
-cp .env.example .env
+docker compose up -d --build
 ```
 
-Edita el archivo `.env` y configura las siguientes variables:
-
-#### Base de Datos PostgreSQL
-```env
-DATABASE_URL="postgresql://usuario:password@localhost:5432/reservas_gregorio_prieto"
-```
-
-#### NextAuth
-```env
-NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="genera-un-secreto-aleatorio-aqui"
-```
-
-Para generar un secreto seguro:
-```bash
-openssl rand -base64 32
-```
-
-#### Firebase (para almacenamiento de imágenes)
-1. Ve a [Firebase Console](https://console.firebase.google.com/)
-2. Crea un nuevo proyecto o selecciona uno existente
-3. Ve a Configuración del proyecto > General
-4. En "Tus aplicaciones", agrega una aplicación web
-5. Copia las credenciales en tu `.env`:
-
-```env
-NEXT_PUBLIC_FIREBASE_API_KEY="tu-api-key"
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="tu-proyecto.firebaseapp.com"
-NEXT_PUBLIC_FIREBASE_PROJECT_ID="tu-project-id"
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="tu-proyecto.appspot.com"
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="123456789"
-NEXT_PUBLIC_FIREBASE_APP_ID="1:123456789:web:abcdef"
-```
-
-#### Google OAuth
-1. Ve a [Google Cloud Console](https://console.cloud.google.com/)
-2. Crea un nuevo proyecto o selecciona uno existente
-3. Ve a "APIs y servicios" > "Credenciales"
-4. Crea credenciales de "ID de cliente de OAuth 2.0"
-5. Configura los orígenes autorizados:
-   - `http://localhost:3000`
-   - Tu dominio de producción
-6. Configura las URIs de redireccionamiento:
-   - `http://localhost:3000/api/auth/callback/google`
-   - Tu dominio de producción + `/api/auth/callback/google`
-7. Copia las credenciales:
-
-```env
-GOOGLE_CLIENT_ID="tu-client-id.apps.googleusercontent.com"
-GOOGLE_CLIENT_SECRET="tu-client-secret"
-```
-
-### 4. Configurar la base de datos
-
-#### Crear la base de datos PostgreSQL
-
-```bash
-# Conectarse a PostgreSQL
-psql -U postgres
-
-# Crear la base de datos
-CREATE DATABASE reservas_gregorio_prieto;
-
-# Salir
-\q
-```
-
-#### Ejecutar migraciones de Prisma
-
-```bash
-# Generar el cliente de Prisma
-npx prisma generate
-
-# Ejecutar migraciones
-npx prisma db push
-
-# (Opcional) Abrir Prisma Studio para ver la BD
-npx prisma studio
-```
-
-### 5. Ejecutar la aplicación
-
-#### Modo desarrollo
-```bash
-npm run dev
-```
-
-La aplicación estará disponible en [http://localhost:3000](http://localhost:3000)
-
-#### Modo producción
-```bash
-# Construir
-npm run build
-
-# Iniciar
-npm start
-```
-
-## 📁 Estructura del Proyecto
-
-```
-├── prisma/
-│   └── schema.prisma          # Esquema de base de datos
-├── public/                    # Archivos estáticos
-├── src/
-│   ├── app/                   # App Router de Next.js
-│   │   ├── api/
-│   │   │   └── auth/         # Endpoints de autenticación
-│   │   ├── auth/
-│   │   │   └── signin/       # Página de login
-│   │   ├── admin/            # Panel de administración
-│   │   ├── menu/             # Páginas de menús
-│   │   ├── orders/           # Gestión de pedidos
-│   │   ├── profile/          # Perfil de usuario
-│   │   ├── layout.tsx        # Layout principal
-│   │   ├── page.tsx          # Página de inicio
-│   │   └── globals.css       # Estilos globales
-│   ├── components/
-│   │   ├── ui/               # Componentes UI reutilizables
-│   │   ├── navbar.tsx        # Barra de navegación
-│   │   ├── menu-list.tsx     # Lista de menús
-│   │   └── providers.tsx     # Proveedores de contexto
-│   ├── lib/
-│   │   ├── auth.ts           # Configuración de NextAuth
-│   │   ├── firebase.ts       # Configuración de Firebase
-│   │   ├── prisma.ts         # Cliente de Prisma
-│   │   ├── format.ts         # Funciones de formato
-│   │   └── utils.ts          # Utilidades generales
-│   └── types/
-│       └── next-auth.d.ts    # Tipos personalizados
-├── .env.example              # Plantilla de variables de entorno
-├── .gitignore
-├── next.config.js            # Configuración de Next.js
-├── package.json
-├── tailwind.config.ts        # Configuración de Tailwind
-└── tsconfig.json             # Configuración de TypeScript
-```
-
-## 👥 Roles de Usuario
-
-### Cliente (CUSTOMER)
-- Ver menús disponibles
-- Hacer reservas de menús completos
-- Comprar platos individuales
-- Ver sus pedidos
-- Editar su perfil
-
-### Profesor/Admin (TEACHER/ADMIN)
-- Todas las funciones de Cliente
-- Crear y editar menús
-- Agregar y editar platos
-- Subir fotos desde dispositivo o usar URLs externas
-- Ver todos los pedidos
-- Activar/Desactivar menús
-- Eliminar menús
-- Gestionar usuarios
+Variables por defecto para docker-compose en `env/.env.docker`.
 
 ## 📤 Gestión de Imágenes
 
