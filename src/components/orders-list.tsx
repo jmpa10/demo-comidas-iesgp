@@ -5,15 +5,13 @@ import { Badge } from './ui/badge';
 import { formatCurrency, formatDateTime } from '@/lib/format';
 import { Clock, CheckCircle, XCircle, Package } from 'lucide-react';
 
-type OrderItem = {
+type OrderLine = {
   id: string;
+  type: 'MENU' | 'DISH';
   quantity: number;
-  price: number;
-  dish: {
-    id: string;
-    name: string;
-    description: string | null;
-  };
+  unitPrice: number;
+  menu: { id: string; name: string; date: Date } | null;
+  dish: { id: string; name: string; description: string | null } | null;
 };
 
 type Order = {
@@ -21,13 +19,7 @@ type Order = {
   createdAt: Date;
   status: string;
   total: number;
-  isFullMenu: boolean;
-  menu: {
-    id: string;
-    name: string;
-    date: Date;
-  } | null;
-  items: OrderItem[];
+  lines: OrderLine[];
 };
 
 interface OrdersListProps {
@@ -82,18 +74,22 @@ export function OrdersList({ orders }: OrdersListProps) {
         const status = statusConfig[order.status as keyof typeof statusConfig] || statusConfig.PENDING;
         const StatusIcon = status.icon;
 
+        const menuNames = Array.from(
+          new Set(
+            order.lines
+              .filter((l) => l.type === 'MENU' && l.menu?.name)
+              .map((l) => l.menu!.name)
+          )
+        );
+        const title = menuNames.length === 1 ? menuNames[0] : menuNames.length > 1 ? 'Pedido mixto' : 'Pedido';
+
         return (
           <Card key={order.id}>
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div>
                   <CardTitle className="flex items-center gap-2">
-                    {order.menu?.name || 'Pedido Personalizado'}
-                    {order.isFullMenu && (
-                      <Badge variant="secondary" className="ml-2">
-                        Menú Completo
-                      </Badge>
-                    )}
+                    {title}
                   </CardTitle>
                   <CardDescription>
                     Pedido realizado el {formatDateTime(order.createdAt)}
@@ -108,18 +104,21 @@ export function OrdersList({ orders }: OrdersListProps) {
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  <h4 className="font-semibold mb-2">Platos:</h4>
+                  <h4 className="font-semibold mb-2">Detalle:</h4>
                   <div className="space-y-2">
-                    {order.items.map((item) => (
+                    {order.lines.map((line) => (
                       <div
-                        key={item.id}
+                        key={line.id}
                         className="flex justify-between text-sm border-b pb-2 last:border-0"
                       >
                         <span>
-                          {item.quantity}x {item.dish.name}
+                          {line.quantity}x{' '}
+                          {line.type === 'MENU'
+                            ? `Menú completo${line.menu?.name ? `: ${line.menu.name}` : ''}`
+                            : line.dish?.name ?? 'Plato'}
                         </span>
                         <span className="font-semibold">
-                          {formatCurrency(item.price * item.quantity)}
+                          {formatCurrency(line.unitPrice * line.quantity)}
                         </span>
                       </div>
                     ))}

@@ -16,9 +16,9 @@ export async function GET() {
       userId: session.user.id,
     },
     include: {
-      menu: true,
-      items: {
+      lines: {
         include: {
+          menu: true,
           dish: true,
         },
       },
@@ -40,7 +40,12 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { menuId, isFullMenu, dishes, total } = body;
+    const { menuId, isFullMenu, dishes } = body as {
+      menuId: string;
+      isFullMenu: boolean;
+      dishes: Array<{ dishId: string; quantity: number }>;
+      total?: number;
+    };
 
     // Asegura email/rol desde BD para automatizaciones (n8n)
     const dbUser = await prisma.user.findUnique({
@@ -48,43 +53,89 @@ export async function POST(request: Request) {
       select: { id: true, email: true, name: true, role: true },
     });
 
+    // Construye líneas: si es menú completo, se registra como línea MENU.
+    // Si son platos, se registran como líneas DISH (con menuId rellenado para trazabilidad).
+    const linesToCreate: Array<{
+      type: 'MENU' | 'DISH';
+      menuId?: string | null;
+      dishId?: string | null;
+      quantity: number;
+      unitPrice: number;
+    }> = [];
+
+    if (isFullMenu) {
+      const menu = await prisma.menu.findUnique({
+        where: { id: menuId },
+        select: { id: true, price: true },
+      });
+      if (!menu) {
+        return NextResponse.json({ error: 'Menú no encontrado' }, { status: 404 });
+      }
+      linesToCreate.push({
+        type: 'MENU',
+        menuId: menu.id,
+        dishId: null,
+        quantity: 1,
+        unitPrice: menu.price,
+      });
+    } else {
+      for (const dish of dishes) {
+        const dbDish = await prisma.dish.findUnique({
+          where: { id: dish.dishId },
+          select: { id: true, price: true, menuId: true },
+        });
+        if (!dbDish) {
+          return NextResponse.json({ error: 'Plato no encontrado' }, { status: 404 });
+        }
+        linesToCreate.push({
+          type: 'DISH',
+          menuId: dbDish.menuId,
+          dishId: dbDish.id,
+          quantity: Math.max(1, Math.floor(dish.quantity || 1)),
+          unitPrice: dbDish.price,
+        });
+      }
+    }
+
+    const total = linesToCreate.reduce((sum, l) => sum + l.quantity * l.unitPrice, 0);
+
     const order = await prisma.order.create({
       data: {
         userId: session.user.id,
-        menuId,
-        isFullMenu,
         total,
         status: 'PENDING',
-        items: {
-          create: dishes.map((dish: any) => ({
-            dishId: dish.dishId,
-            quantity: dish.quantity,
-            price: dish.price,
+        lines: {
+          create: linesToCreate.map((line) => ({
+            type: line.type,
+            menuId: line.menuId ?? null,
+            dishId: line.dishId ?? null,
+            quantity: line.quantity,
+            unitPrice: line.unitPrice,
           })),
         },
       },
       include: {
-        items: {
+        lines: {
           include: {
+            menu: true,
             dish: true,
           },
         },
-        menu: true,
       },
     });
 
     await sendToN8n('order.created', {
       order: {
         id: order.id,
-        menuId: order.menuId,
         total: order.total,
         status: order.status,
-        isFullMenu: order.isFullMenu,
         createdAt: order.createdAt,
-        items: order.items.map((item) => ({
-          dishId: item.dishId,
-          quantity: item.quantity,
-          price: item.price,
+        lines: order.lines.map((line) => ({
+          type: line.type,
+          menuId: line.menuId,
+          dishId: line.dishId,
+          quantity: line.quantity,
+          unitPrice: line.unitPrice,
         })),
       },
       user: {

@@ -16,9 +16,9 @@ export default async function OrdersPage() {
       userId: session.user.id,
     },
     include: {
-      menu: true,
-      items: {
+      lines: {
         include: {
+          menu: true,
           dish: true,
         },
       },

@@ -70,30 +70,29 @@ export function MenuDetailClient({ menu, userId }: MenuDetailClientProps) {
   const handleReserve = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/orders', {
+      const response = await fetch('/api/cart', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           menuId: menu.id,
           isFullMenu,
           dishes: isFullMenu
-            ? menu.dishes.map((d) => ({ dishId: d.id, quantity: 1, price: d.price }))
+            ? menu.dishes.map((d) => ({ dishId: d.id, quantity: 1 }))
             : Object.entries(selectedDishes).map(([dishId, quantity]) => ({
                 dishId,
                 quantity,
-                price: menu.dishes.find((d) => d.id === dishId)?.price || 0,
               })),
           total: calculateTotal(),
         }),
       });
 
       if (response.ok) {
-        router.push('/orders');
+        router.push('/cart');
       } else {
-        alert('Error al crear la reserva');
+        alert('Error al añadir al carrito');
       }
     } catch (error) {
-      alert('Error al crear la reserva');
+      alert('Error al añadir al carrito');
     } finally {
       setIsLoading(false);
     }
@@ -278,7 +277,7 @@ export function MenuDetailClient({ menu, userId }: MenuDetailClientProps) {
                   onClick={handleReserve}
                 >
                   <ShoppingCart className="h-5 w-5 mr-2" />
-                  {isLoading ? 'Procesando...' : 'Confirmar Reserva'}
+                  {isLoading ? 'Procesando...' : 'Añadir al carrito'}
                 </Button>
               </div>
             </CardContent>

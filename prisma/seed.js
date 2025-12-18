@@ -1,6 +1,12 @@
-const { PrismaClient } = require('@prisma/client')
+require('dotenv/config')
 
-const prisma = new PrismaClient()
+const { PrismaClient } = require('@prisma/client')
+const { PrismaPg } = require('@prisma/adapter-pg')
+
+const connectionString = process.env.DATABASE_URL
+const prisma = connectionString
+  ? new PrismaClient({ adapter: new PrismaPg({ connectionString }) })
+  : new PrismaClient()
 
 async function main() {
   console.log('🌱 Creando usuarios de prueba...')

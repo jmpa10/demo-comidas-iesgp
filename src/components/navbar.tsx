@@ -1,19 +1,52 @@
 'use client';
 
+import { useEffect, useMemo, useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Button } from './ui/button';
 import { 
   ShoppingCart, 
   Menu as MenuIcon, 
   User, 
   LogOut,
-  Settings,
-  LayoutDashboard
+  LayoutDashboard,
+  Package
 } from 'lucide-react';
 
 export function Navbar() {
   const { data: session } = useSession();
+  const pathname = usePathname();
+  const [cartCount, setCartCount] = useState<number>(0);
+
+  const isAuthed = useMemo(() => Boolean(session?.user?.id), [session?.user?.id]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadCartCount() {
+      if (!isAuthed) {
+        setCartCount(0);
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/cart', { cache: 'no-store' });
+        if (!res.ok) return;
+        const data = (await res.json()) as { items?: Array<{ quantity: number }> };
+        const items = data.items ?? [];
+        const totalQty = items.reduce((sum, line) => sum + (Number(line.quantity) || 0), 0);
+        if (!cancelled) setCartCount(totalQty);
+      } catch {
+        // Silencioso: el contador es decorativo.
+      }
+    }
+
+    loadCartCount();
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthed, pathname]);
 
   return (
     <nav className="bg-white border-b border-border sticky top-0 z-50">
@@ -40,8 +73,22 @@ export function Navbar() {
                 
                 <Link href="/orders">
                   <Button variant="ghost" size="sm">
-                    <ShoppingCart className="h-4 w-4 mr-2" />
+                    <Package className="h-4 w-4 mr-2" />
                     Mis Pedidos
+                  </Button>
+                </Link>
+
+                <Link href="/cart">
+                  <Button variant="ghost" size="sm">
+                    <span className="relative mr-2 inline-flex">
+                      <ShoppingCart className="h-5 w-5" />
+                      {cartCount > 0 && (
+                        <span className="absolute right-0 top-0 z-10 inline-flex min-w-4 h-4 px-1 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-semibold leading-none tabular-nums">
+                          {cartCount > 99 ? '99+' : cartCount}
+                        </span>
+                      )}
+                    </span>
+                    Carrito
                   </Button>
                 </Link>
 

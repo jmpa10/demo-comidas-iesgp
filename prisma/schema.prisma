@@ -4,7 +4,11 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+}
+
+enum OrderLineType {
+  MENU
+  DISH
 }
 
 model User {
@@ -17,6 +21,7 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   orders        Order[]
+  cart          Cart?
   accounts      Account[]
   sessions      Session[]
 }
@@ -66,7 +71,8 @@ model Menu {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   dishes      Dish[]
-  orders      Order[]
+  orderLines  OrderLine[]
+  cartLines   CartLine[]
 }
 
 model Dish {
@@ -77,7 +83,8 @@ model Dish {
   imageUrl    String?
   menuId      String
   menu        Menu        @relation(fields: [menuId], references: [id], onDelete: Cascade)
-  orderItems  OrderItem[]
+  orderLines  OrderLine[]
+  cartLines   CartLine[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 }
@@ -86,23 +93,54 @@ model Order {
   id         String      @id @default(cuid())
   userId     String
   user       User        @relation(fields: [userId], references: [id])
-  menuId     String?
-  menu       Menu?       @relation(fields: [menuId], references: [id])
   status     String      @default("PENDING")
   total      Float
-  isFullMenu Boolean     @default(false)
-  items      OrderItem[]
+  lines      OrderLine[]
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
 }
 
-model OrderItem {
-  id        String   @id @default(cuid())
+model OrderLine {
+  id        String        @id @default(cuid())
   orderId   String
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  dishId    String
-  dish      Dish     @relation(fields: [dishId], references: [id])
-  quantity  Int      @default(1)
-  price     Float
-  createdAt DateTime @default(now())
+  order     Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  type      OrderLineType
+  menuId    String?
+  menu      Menu?         @relation(fields: [menuId], references: [id], onDelete: SetNull)
+  dishId    String?
+  dish      Dish?         @relation(fields: [dishId], references: [id], onDelete: SetNull)
+  quantity  Int           @default(1)
+  unitPrice Float
+  createdAt DateTime      @default(now())
+
+  @@index([orderId])
+  @@index([menuId])
+  @@index([dishId])
+}
+
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String     @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartLine[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model CartLine {
+  id        String        @id @default(cuid())
+  cartId    String
+  cart      Cart          @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  lineKey   String
+  type      OrderLineType
+  menuId    String?
+  menu      Menu?         @relation(fields: [menuId], references: [id], onDelete: SetNull)
+  dishId    String?
+  dish      Dish?         @relation(fields: [dishId], references: [id], onDelete: SetNull)
+  quantity  Int           @default(1)
+  unitPrice Float
+  createdAt DateTime      @default(now())
+
+  @@unique([cartId, lineKey])
+  @@index([cartId])
 }

@@ -20,6 +20,20 @@ export function AdminDashboard({ orders, menus, users }: AdminDashboardProps) {
   const pendingOrders = orders.filter((o) => o.status === 'PENDING').length;
   const [menusState, setMenusState] = useState(menus);
 
+  const orderLabel = (order: any): string => {
+    const menuNames = Array.from(
+      new Set(
+        (order.lines ?? [])
+          .filter((l: any) => l.type === 'MENU' && l.menu?.name)
+          .map((l: any) => String(l.menu.name))
+      )
+    ) as string[];
+
+    if (menuNames.length === 1) return menuNames[0] as string;
+    if (menuNames.length > 1) return 'Pedido mixto';
+    return 'Pedido';
+  };
+
   const toggleMenuAvailability = async (menuId: string, currentState: boolean) => {
     try {
       const response = await fetch('/api/menus', {
@@ -149,7 +163,7 @@ export function AdminDashboard({ orders, menus, users }: AdminDashboardProps) {
                         {order.user.name || order.user.email}
                       </CardTitle>
                       <CardDescription>
-                        {formatDateTime(order.createdAt)} • {order.menu?.name || 'Personalizado'}
+                        {formatDateTime(order.createdAt)} • {orderLabel(order)}
                       </CardDescription>
                     </div>
                     <Badge>{order.status}</Badge>
@@ -159,7 +173,7 @@ export function AdminDashboard({ orders, menus, users }: AdminDashboardProps) {
                   <div className="flex justify-between items-center">
                     <div>
                       <p className="text-sm text-muted-foreground">
-                        {order.items.length} platos
+                        {(order.lines?.length ?? 0)} líneas
                       </p>
                     </div>
                     <span className="text-xl font-bold text-primary">
@@ -212,7 +226,7 @@ export function AdminDashboard({ orders, menus, users }: AdminDashboardProps) {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  {menu._count.orders} pedidos realizados
+                  {menu._count.orderLines} líneas de pedido
                 </p>
               </CardContent>
             </Card>

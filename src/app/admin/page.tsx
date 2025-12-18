@@ -19,9 +19,9 @@ export default async function AdminPage() {
     prisma.order.findMany({
       include: {
         user: true,
-        menu: true,
-        items: {
+        lines: {
           include: {
+            menu: true,
             dish: true,
           },
         },
@@ -34,7 +34,7 @@ export default async function AdminPage() {
       include: {
         dishes: true,
         _count: {
-          select: { orders: true },
+          select: { orderLines: true },
         },
       },
       orderBy: {

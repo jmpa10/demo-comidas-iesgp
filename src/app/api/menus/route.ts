@@ -82,7 +82,7 @@ export async function GET() {
     include: {
       dishes: true,
       _count: {
-        select: { orders: true },
+        select: { orderLines: true },
       },
     },
     orderBy: {
