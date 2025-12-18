@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { storage } from "@/lib/firebase";
+import { isFirebaseConfigured, storage } from "@/lib/firebase";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -24,17 +24,12 @@ export function ImageUpload({ label, value, onChange, folder = "dishes" }: Image
   const [firebaseError, setFirebaseError] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Verificar si Firebase está configurado
-  const isFirebaseConfigured = () => {
-    return storage && process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
-  };
-
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     // Verificar configuración de Firebase
-    if (!isFirebaseConfigured()) {
+    if (!isFirebaseConfigured || !storage) {
       setFirebaseError(true);
       alert("Firebase Storage no está configurado. Por favor usa la opción de URL o configura Firebase.");
       return;
@@ -215,7 +210,7 @@ export function ImageUpload({ label, value, onChange, folder = "dishes" }: Image
       )}
 
       {/* Mensaje de Firebase no configurado */}
-      {firebaseError && !isFirebaseConfigured() && (
+      {firebaseError && (!isFirebaseConfigured || !storage) && (
         <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
           <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
           <div>
